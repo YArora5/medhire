@@ -109,6 +109,7 @@ const loginNurse = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     ).select("-password");
@@ -127,6 +128,7 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const allowedFields = [
       "fullName",
       "phone",
@@ -164,6 +166,7 @@ const updateProfile = async (req, res) => {
 
 const uploadDocuments = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     );
@@ -205,6 +208,7 @@ const uploadDocuments = async (req, res) => {
 
 const toggleVisibility = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     );
