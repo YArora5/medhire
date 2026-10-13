@@ -1,4 +1,11 @@
 const Hospital = require("../models/Hospital");
+
+const sanitizeHospital = (hospital) => {
+  if (!hospital) return hospital;
+  const safe = hospital.toObject ? hospital.toObject() : { ...hospital };
+  delete safe.password;
+  return safe;
+};
 const Nurse = require("../models/Nurse");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -42,7 +49,7 @@ const registerHospital = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Hospital registered successfully",
-      hospital,
+      hospital: sanitizeHospital(hospital),
     });
   } catch (error) {
     res.status(500).json({
@@ -94,7 +101,7 @@ const loginHospital = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      hospital,
+      hospital: sanitizeHospital(hospital),
     });
   } catch (error) {
     res.status(500).json({
