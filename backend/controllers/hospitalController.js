@@ -113,6 +113,7 @@ const loginHospital = async (req, res) => {
 
 const getVisibleNurses = async (req, res) => {
   try {
+    if (!req.user.hospitalId) return res.status(403).json({ success: false, message: "Hospital account required" });
     const nurses = await Nurse.find({
       isVisible: true,
     }).select("-password");
@@ -131,6 +132,7 @@ const getVisibleNurses = async (req, res) => {
 };
 const searchNursesByCity = async (req, res) => {
   try {
+    if (!req.user.hospitalId) return res.status(403).json({ success: false, message: "Hospital account required" });
     const { city } = req.params;
 
     const nurses = await Nurse.find({
@@ -158,6 +160,7 @@ const searchNursesBySpecialization = async (
   res
 ) => {
   try {
+    if (!req.user.hospitalId) return res.status(403).json({ success: false, message: "Hospital account required" });
     const { specialization } = req.params;
 
     const nurses = await Nurse.find({
