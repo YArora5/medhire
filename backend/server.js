@@ -21,7 +21,7 @@ app.use(cors());
 app.use(express.json());
 
 // Uploads Folder Access
-app.use("/uploads", express.static("uploads"));
+// Uploaded CVs and certificates are private documents; do not expose the upload directory publicly.
 
 // Routes
 app.use("/api/nurses", nurseRoutes);

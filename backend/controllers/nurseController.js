@@ -1,4 +1,11 @@
 const Nurse = require("../models/Nurse");
+
+const sanitizeNurse = (nurse) => {
+  if (!nurse) return nurse;
+  const safe = nurse.toObject ? nurse.toObject() : { ...nurse };
+  delete safe.password;
+  return safe;
+};
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -40,7 +47,7 @@ const registerNurse = async (req, res) => {
     res.status(201).json({
       success: true,
       message: "Nurse registered successfully",
-      nurse,
+      nurse: sanitizeNurse(nurse),
     });
   } catch (error) {
     res.status(500).json({
@@ -90,7 +97,7 @@ const loginNurse = async (req, res) => {
       success: true,
       message: "Login successful",
       token,
-      nurse,
+      nurse: sanitizeNurse(nurse),
     });
   } catch (error) {
     res.status(500).json({
@@ -102,13 +109,14 @@ const loginNurse = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     ).select("-password");
 
     res.status(200).json({
       success: true,
-      nurse,
+      nurse: sanitizeNurse(nurse),
     });
   } catch (error) {
     res.status(500).json({
@@ -120,18 +128,33 @@ const getProfile = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
+    const allowedFields = [
+      "fullName",
+      "phone",
+      "qualification",
+      "experience",
+      "specialization",
+      "location",
+    ];
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
     const nurse = await Nurse.findByIdAndUpdate(
       req.user.nurseId,
-      req.body,
+      updates,
       {
         new: true,
+        runValidators: true,
       }
     ).select("-password");
 
     res.status(200).json({
       success: true,
       message: "Profile updated successfully",
-      nurse,
+      nurse: sanitizeNurse(nurse),
     });
   } catch (error) {
     res.status(500).json({
@@ -143,6 +166,7 @@ const updateProfile = async (req, res) => {
 
 const uploadDocuments = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     );
@@ -172,7 +196,7 @@ const uploadDocuments = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Files uploaded successfully",
-      nurse,
+      nurse: sanitizeNurse(nurse),
     });
   } catch (error) {
     res.status(500).json({
@@ -184,6 +208,7 @@ const uploadDocuments = async (req, res) => {
 
 const toggleVisibility = async (req, res) => {
   try {
+    if (!req.user.nurseId) return res.status(403).json({ success: false, message: "Nurse account required" });
     const nurse = await Nurse.findById(
       req.user.nurseId
     );
